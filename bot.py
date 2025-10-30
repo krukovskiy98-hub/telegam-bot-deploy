@@ -14,7 +14,7 @@ logging.basicConfig(
 print("=== 🚀 НАЧИНАЕМ ЗАПУСК БОТА ===")
 
 # Проверка токена
-BOT_TOKEN = os.environ.get('BOT_TOKEN')
+BOT_TOKEN = "8072280922:AAHGvdyamtcDGYjQlGZ8_TLIW-dK-GpN9Bc"
 print(f"🔑 Токен получен: {'ДА' if BOT_TOKEN else 'НЕТ'}")
 
 if not BOT_TOKEN:
