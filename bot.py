@@ -1,66 +1,55 @@
 import os
 import logging
-from telegram import Update, ReplyKeyboardMarkup
+import sys
+from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackContext
-from flask import Flask
-from threading import Thread
 
-# Настройки
+# Настройка логирования
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO,
+    stream=sys.stdout
+)
+
+print("=== 🚀 НАЧИНАЕМ ЗАПУСК БОТА ===")
+
+# Проверка токена
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
-PORT = int(os.environ.get('PORT', 8080))
+print(f"🔑 Токен получен: {'ДА' if BOT_TOKEN else 'НЕТ'}")
 
-# Flask для Railway
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "🤖 Бот работает на Railway! ✅"
-
-def run_flask():
-    app.run(host='0.0.0.0', port=PORT)
-
-# База продавцов
-SELLERS = {
-    "💄 Красота": [
-        {
-            "name": "💇 Салон 'Элит'",
-            "metro": "Маяковская", 
-            "address": "Москва, Тверская ул., 15",
-            "rating": 4.8,
-            "phone": "+7-999-123-45-67"
-        }
-    ]
-}
+if not BOT_TOKEN:
+    print("❌ ОШИБКА: BOT_TOKEN не найден в переменных окружения!")
+    print("💡 Решение: добавьте BOT_TOKEN в Environment Variables в Render")
+    sys.exit(1)
 
 async def start(update: Update, context: CallbackContext):
-    keyboard = ReplyKeyboardMarkup([
-        ['⚡ Наша база продавцов', '🗺️ Глобальный поиск по метро']
-    ], resize_keyboard=True)
-    
+    print(f"👋 Пользователь {update.message.from_user.first_name} запустил бота")
     await update.message.reply_text(
         f'👋 Привет, {update.message.from_user.first_name}!\n'
-        'Бот успешно запущен! 🚀\n'
-        'Выберите тип поиска:',
-        reply_markup=keyboard
+        '✅ Бот успешно запущен на Render! 🚀\n'
+        'Все функции работают корректно!'
     )
 
-async def handle_search_type(update: Update, context: CallbackContext):
-    context.user_data['search_type'] = update.message.text
-    categories = [['💄 Красота', '❤️ Здоровье']]
-    await update.message.reply_text(
-        'Выберите категорию:',
-        reply_markup=ReplyKeyboardMarkup(categories, resize_keyboard=True)
-    )
+async def echo(update: Update, context: CallbackContext):
+    print(f"💬 Сообщение от пользователя: {update.message.text}")
+    await update.message.reply_text(f'✅ Вы написали: {update.message.text}')
 
-async def handle_category(update: Update, context: CallbackContext):
-    category = update.message.text
-    if category in SELLERS:
-        seller = SELLERS[category][0]
-        response = (
-            f"🏢 {seller['name']}\n"
-            f"⭐ Рейтинг: {seller['rating']}/5\n" 
-            f"🚇 Метро: {seller['metro']}\n"
-            f"📞 Телефон: {seller['phone']}\n"
-            f"📍 Адрес: {seller['address']}"
-        )
-        await update
+def main():
+    try:
+        print("1. 🚀 Создаем приложение бота...")
+        application = Application.builder().token(BOT_TOKEN).build()
+        
+        print("2. 📝 Добавляем обработчики...")
+        application.add_handler(CommandHandler("start", start))
+        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+        
+        print("3. ✅ Бот запускает polling...")
+        print("=== 🌟 БОТ УСПЕШНО ЗАПУЩЕН ===")
+        application.run_polling()
+        
+    except Exception as e:
+        print(f"❌ КРИТИЧЕСКАЯ ОШИБКА: {e}")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()
