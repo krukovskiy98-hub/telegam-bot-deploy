@@ -1,32 +1,30 @@
 import os
 import logging
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 
-def start(update, context):
-    update.message.reply_text("✅ Бот запущен и работает!")
+async def start(update, context):
+    await update.message.reply_text("✅ Бот запущен и работает!")
 
-def echo(update, context):
-    update.message.reply_text(f"Ты сказал: {update.message.text}")
+async def echo(update, context):
+    await update.message.reply_text(f"Ты сказал: {update.message.text}")
 
 def main():
     if not BOT_TOKEN:
         logger.error("❌ BOT_TOKEN не установлен!")
         return
     
-    updater = Updater(BOT_TOKEN)
-    dp = updater.dispatcher
+    application = Application.builder().token(BOT_TOKEN).build()
     
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(Filters.text, echo))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT, echo))
     
-    updater.start_polling()
     logger.info("✅ Бот запущен!")
-    updater.idle()
+    application.run_polling()
 
-if name == '__main__':
+if __name__ == '__main__':
     main()
