@@ -9,7 +9,7 @@ logging.basicConfig(
 )
 
 # ВРЕМЕННО - токен в коде для теста
-BOT_TOKEN = "ВАШ_ТОКЕН_ЗДЕСЬ"
+BOT_TOKEN = "8072280922:AAHGvdyamtcDGYjQlGZ8_TLIW-dK-GpN9Bc"
 
 async def start(update, context):
     await update.message.reply_text("✅ Бот запущен и работает!")
