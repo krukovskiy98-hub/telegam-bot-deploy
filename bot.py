@@ -1,33 +1,34 @@
 import os
 import logging
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+import asyncio
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
 
-# ВРЕМЕННО - токен прямо в коде для теста
-BOT_TOKEN = "8072280922:AAHGvdyamtcDGYjQlGZ8_TLIW-dK-GpN9Bc"
+# ВРЕМЕННО - токен в коде для теста
+BOT_TOKEN = "ВАШ_ТОКЕН_ЗДЕСЬ"
 
-def start(update, context):
-    update.message.reply_text("✅ Бот запущен и работает!")
+async def start(update, context):
+    await update.message.reply_text("✅ Бот запущен и работает!")
 
-def echo(update, context):
-    update.message.reply_text(f"Ты сказал: {update.message.text}")
+async def echo(update, context):
+    await update.message.reply_text(f"Эхо: {update.message.text}")
 
 def main():
-    if not BOT_TOKEN:
-        logger.error("❌ BOT_TOKEN не установлен!")
+    if not BOT_TOKEN or BOT_TOKEN == "ВАШ_ТОКЕН_ЗДЕСЬ":
+        logging.error("❌ BOT_TOKEN не установлен!")
         return
     
-    updater = Updater(BOT_TOKEN, use_context=True)
-    dp = updater.dispatcher
+    application = Application.builder().token(BOT_TOKEN).build()
     
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(Filters.text, echo))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
     
-    updater.start_polling()
-    logger.info("✅ Бот запущен!")
-    updater.idle()
+    logging.info("✅ Бот запускается...")
+    application.run_polling()
 
 if __name__ == '__main__':
     main()
